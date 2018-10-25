@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-
+#Main robot file
 import wpilib
 
-
-class MyRobot(wpilib.IterativeRobot):
+class Robot(wpilib.IterativeRobot):
     '''Main robot class'''
 
     def robotInit(self):
@@ -56,4 +54,4 @@ class MyRobot(wpilib.IterativeRobot):
 
 
 if __name__ == '__main__':
-    wpilib.run(MyRobot, physics_enabled=True)
+    wpilib.run(Robot, physics_enabled=True)
