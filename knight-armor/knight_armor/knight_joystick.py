@@ -5,7 +5,7 @@ import wpilib
 class KnightJoystick(KnightEmitter):
     #port is the port xbox controller is on
     def __init__(self, port):
-        KnightEmitter.__init__(self)
+        super().__init__()
         self.joystick = wpilib.XboxController(port)
         #methods to check for updates
         self.stateGetters = {

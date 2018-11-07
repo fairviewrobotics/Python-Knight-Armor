@@ -1,4 +1,4 @@
-from knight_emitter import KnightEmitter
+from knight_armor.knight_emitter import KnightEmitter
 import datetime, enum
 
 #Log levels
