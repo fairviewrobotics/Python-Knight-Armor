@@ -3,15 +3,18 @@ import wpilib
 
 import knight_armor
 
-#example subsystem
-class MainSubsystem(knight_armor.KnightSubsystem):
-    def __init__(self):
-        super().__init__("MainSubsystem")
-        #Joystick object
-        self.joystick = knight_armor.KnightJoystick(0)
+
+#A very incomplete drive train subsytem
+class DriveTrain(knight_armor.KnightSubsystem):
+
+    def __init__(self, emitter):
+        super().__init__("DriveTrain")
+        #add listener for controllign emitter
+        emitter.addListener(self.recive)
+
         #claim ports
         self.claimPort(1, knight_armor.PortType.PULSE_WIDTH_MODULATION)
-        self.claimPort(2,knight_armor.PortType.PULSE_WIDTH_MODULATION)
+        self.claimPort(2, knight_armor.PortType.PULSE_WIDTH_MODULATION)
         self.claimPort(3, knight_armor.PortType.PULSE_WIDTH_MODULATION)
         self.claimPort(4, knight_armor.PortType.PULSE_WIDTH_MODULATION)
         #motors
@@ -22,11 +25,28 @@ class MainSubsystem(knight_armor.KnightSubsystem):
 
         self.robot_drive = wpilib.RobotDrive(self.lf_motor, self.lr_motor,
                                              self.rf_motor, self.rr_motor)
+
+    def recive(self, msg):
+        #currently arcadeDrive, but a more versatile driver should be implemented
+        self.robot_drive.arcadeDrive(msg["speed"], msg["turn"])
+
+
+#example subsystem
+class MainSubsystem(knight_armor.KnightSubsystem):
+    def __init__(self):
+        super().__init__("MainSubsystem")
+        #Joystick object
+        self.joystick = knight_armor.KnightJoystick(0)
+        #emitter for drive train subsytem
+        self.driveTrainEmitter = knight_armor.KnightEmitter()
+        #drive train subsytem
+        self.driveTrain = DriveTrain(self.driveTrainEmitter)
+
         #register our joystick reciver
         self.joystick.addListener(self.receiveJoystick)
 
     def receiveJoystick(self, state):
-        self.robot_drive.arcadeDrive(state["leftStickY"] * -0.5, state["leftStickX"] * 0.5)
+        self.driveTrainEmitter.emit({"speed": state["leftStickY"] * -0.5, "turn": state["leftStickX"] * 0.5})
 
     def run(self):
         self.joystick.update()
