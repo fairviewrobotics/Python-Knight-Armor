@@ -1,5 +1,6 @@
 #Main robot file
-import wpilib
+import wpilib, ctre
+import wpilib.drive
 
 import knight_armor
 
@@ -13,21 +14,17 @@ class DriveTrain(knight_armor.KnightSubsystem):
         emitter.addListener(self.recive)
 
         #claim ports
-        self.claimPort(1, knight_armor.PortType.PULSE_WIDTH_MODULATION)
-        self.claimPort(2, knight_armor.PortType.PULSE_WIDTH_MODULATION)
         self.claimPort(3, knight_armor.PortType.PULSE_WIDTH_MODULATION)
-        self.claimPort(4, knight_armor.PortType.PULSE_WIDTH_MODULATION)
+        self.claimPort(0, knight_armor.PortType.PULSE_WIDTH_MODULATION)
         #motors
-        self.lr_motor = wpilib.Talon(1)
-        self.rr_motor = wpilib.Talon(2)
-        self.lf_motor = wpilib.Talon(3)
-        self.rf_motor = wpilib.Talon(4)
+        self.l_motor = ctre.WPI_TalonSRX(0)
+        self.r_motor = ctre.WPI_TalonSRX(3)
 
-        self.robot_drive = wpilib.RobotDrive(self.lf_motor, self.lr_motor,
-                                             self.rf_motor, self.rr_motor)
+        self.robot_drive = wpilib.drive.DifferentialDrive(self.l_motor, self.r_motor)
 
     def recive(self, msg):
         #currently arcadeDrive, but a more versatile driver should be implemented
+        print("Speed: " + str(msg["speed"]) + ", Turn: " + str(msg["turn"]))
         self.robot_drive.arcadeDrive(msg["speed"], msg["turn"])
 
 
@@ -40,13 +37,12 @@ class MainSubsystem(knight_armor.KnightSubsystem):
         #emitter for drive train subsytem
         self.driveTrainEmitter = knight_armor.KnightEmitter()
         #drive train subsytem
-        self.driveTrain = DriveTrain(self.driveTrainEmitter)
-
+        DriveTrain(self.driveTrainEmitter)
         #register our joystick reciver
         self.joystick.addListener(self.receiveJoystick)
 
     def receiveJoystick(self, state):
-        self.driveTrainEmitter.emit({"speed": state["leftStickY"] * -0.5, "turn": state["leftStickX"] * 0.5})
+        self.driveTrainEmitter.emit({"speed": state["leftStickY"] * -0.4, "turn": state["leftStickX"] * 0.4})
 
     def run(self):
         self.joystick.update()
@@ -57,6 +53,7 @@ class Robot(wpilib.IterativeRobot):
     def robotInit(self):
         '''Robot-wide initialization code should go here'''
         self.sub = MainSubsystem()
+
 
     def disabled(self):
         '''Called when the robot is disabled'''
